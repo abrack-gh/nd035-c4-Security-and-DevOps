@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Optional;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -51,4 +53,83 @@ public class UserControllerTest {
         assertEquals("thisIsHashed", u.getPassword());
 
     }
+
+    @Test
+    public void create_user_pw_too_short() throws Exception{
+        when(encoder.encode("test")).thenReturn("thisIsHashed");
+        CreateUserRequest f = new CreateUserRequest();
+        f.setUsername("test");
+        f.setPassword("test"); // below minimum password req so should fail.
+        f.setConfirmPassword("test"); // below minimum password req so should fail.
+
+        ResponseEntity<User> response = userController.createUser(f); //400
+
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCodeValue()); //error 400 due to below minimum pw req.
+    }
+
+    @Test
+    public void create_user_pw_NOT_match() throws Exception{
+        when(encoder.encode("test1234")).thenReturn("thisIsHashed");
+        CreateUserRequest a = new CreateUserRequest();
+        a.setUsername("test");
+        a.setPassword("test1234");
+        a.setConfirmPassword("test12345"); // confirmPassword != password..
+
+        ResponseEntity<User> response = userController.createUser(a);
+
+        assertNotNull(response);
+        assertEquals(400, response.getStatusCodeValue()); //error 400 bad request due to no matching password confirmation.
+    }
+
+    @Test
+    public void testFindById() {
+        User user = new User();
+
+        long id = 1L;
+        user.setId(id);
+        user.setUsername("user");
+        user.setPassword("test1234");
+
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        ResponseEntity<User> response = userController.findById(id);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue()); // should find user.
+
+        User y = response.getBody();
+
+        assertNotNull(y);
+        assertEquals(id, y.getId());
+        assertEquals("user", y.getUsername());
+        assertEquals("test1234", y.getPassword());
+    }
+
+
+    @Test
+    public void testFindByUserName() {
+        User user = new User();
+
+        long id = 1L;
+        user.setId(id);
+        user.setUsername("user");
+        user.setPassword("test1234");
+
+        when(userRepository.findByUsername("user")).thenReturn(user);
+
+        ResponseEntity<User> response = userController.findByUserName("user");
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue()); // should find username.
+
+        User y = response.getBody();
+
+        assertNotNull(y);
+        assertEquals(id, y.getId());
+        assertEquals("user", y.getUsername());
+        assertEquals("test1234", y.getPassword());
+
+    }
+
 }
