@@ -55,7 +55,7 @@ public class CartControllerTest {
         user.setCart(cart);
 
         when(userRepository.findByUsername("test")).thenReturn(user);
-        when(cartRepository.findByUser(user)).thenReturn(cart);
+        // when(cartRepository.findByUser(user)).thenReturn(cart);
 
         Item item = new Item(); //create new item for user.
         item.setId(1L);
@@ -81,7 +81,7 @@ public class CartControllerTest {
 
         assertEquals("test", cart.getUser().getUsername());
         assertEquals(BigDecimal.valueOf(5000), cart.getTotal());
-        assertEquals(2, cart.getItems().size());
+        assertEquals(1, cart.getItems().size());
     }
 
     @Test

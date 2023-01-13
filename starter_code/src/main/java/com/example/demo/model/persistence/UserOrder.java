@@ -79,6 +79,8 @@ public class UserOrder {
 		order.setItems(cart.getItems().stream().collect(Collectors.toList()));
 		order.setTotal(cart.getTotal());
 		order.setUser(cart.getUser());
+
+
 		return order;
 	}
 	
