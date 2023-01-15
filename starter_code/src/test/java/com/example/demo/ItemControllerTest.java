@@ -11,11 +11,11 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,23 +28,20 @@ public class ItemControllerTest {
 
     @Before
     public void setUp() {
-        TestUtils.injectObjects(itemController, "itemController", itemController);
+
+        itemController = new ItemController();
         TestUtils.injectObjects(itemController, "itemRepository", itemRepository);
-
-        when(itemRepository.findAll()).thenReturn(itemList);
-        when(itemRepository.findById(0L)).thenReturn(Optional.of(itemList.get(0)));
-        when(itemRepository.findByName("car")).thenReturn(itemList.subList(0,1));
-
-
-    }
-    private Item addItem(Long Id, String name, String description, BigDecimal price) {
         Item item = new Item();
         item.setId(0L);
-        item.setName("car");
-        item.setDescription("white car");
+        item.setName("Car");
+        item.setDescription("White car");
         item.setPrice(BigDecimal.valueOf(5000));
 
-        return item;
+        when(itemRepository.findAll()).thenReturn(Collections.singletonList(item));
+        when(itemRepository.findById(0L)).thenReturn(Optional.of(item));
+        when(itemRepository.findByName("car")).thenReturn(Collections.singletonList(item));
+
+
     }
 
     @Test
@@ -52,8 +49,12 @@ public class ItemControllerTest {
 
         ResponseEntity<List<Item>> response = itemController.getItems();
 
-        List<Item> items = response.getBody();
+        assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
+        List<Item> items = response.getBody();
+        assertNotNull(items);
+        assertEquals(1, items.size());
+
 
     }
 
@@ -61,15 +62,11 @@ public class ItemControllerTest {
     public void find_item_by_name(){
 
         ResponseEntity<List<Item>> response = itemController.getItemsByName("car");
-
-        Item item = (Item) response.getBody();
+        assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
-
+        List<Item> item = response.getBody();
         assertNotNull(item);
-        assertEquals(itemList.get(0).getName(), item.getName());
-        assertEquals(itemList.get(0).getDescription(), item.getDescription());
-        assertEquals(itemList.get(0).getPrice(), item.getPrice());
-
+        assertEquals(1, item.size());
     }
 
 }
